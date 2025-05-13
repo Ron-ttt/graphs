@@ -7,17 +7,26 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
-      pages: write
-    
+      contents: write  # Для записи в репозиторий
+      pages: write     # Для публикации Pages
+      id-token: write  # Для OIDC (OpenID Connect)
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+
+      - name: Build static site
         run: |
           mkdir -p public
           cp -r frontend/* public/
-          touch public/.nojekyll  # Важно!
+          touch public/.nojekyll
 
-      - name: Deploy
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: 'public'
+
+      - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v2
