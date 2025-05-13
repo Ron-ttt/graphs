@@ -12,24 +12,22 @@ jobs:
       id-token: write
 
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Setup Pages
         uses: actions/configure-pages@v3
 
-      - name: Build site
+      - name: Build static site
         run: |
           mkdir -p public
           cp -r frontend/* public/
           touch public/.nojekyll
 
-      - name: Upload artifact
-        if: success()
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v2
         with:
           path: 'public'
 
-      - name: Deploy
-        if: success()
+      - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v2
