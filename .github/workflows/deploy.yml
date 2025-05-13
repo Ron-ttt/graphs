@@ -12,8 +12,9 @@ jobs:
       id-token: write
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build
         run: |
@@ -21,13 +22,14 @@ jobs:
           cp -r frontend/* public/
           touch public/.nojekyll
 
-      - name: Direct Deploy
+      - name: Deploy
         run: |
           cd public
           git init
-          git checkout -b gh-pages  # Явно создаем нужную ветку
-          git add .
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-          git commit -m "Deploy to GitHub Pages"
-          git push -f https://${{ github.token }}@github.com/${{ github.repository }}.git gh-pages
+          git checkout -b gh-pages
+          git add .
+          git commit -m "Deploy $(date +'%Y-%m-%d %H:%M:%S')"
+          git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git push -f origin gh-pages
