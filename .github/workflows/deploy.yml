@@ -16,25 +16,15 @@ jobs:
 
       - name: Setup Pages
         uses: actions/configure-pages@v3
-        
-      - name: Clear cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.npm
-            public/
-          key: ${{ runner.os }}-build-${{ hashFiles('frontend/**') }}
 
-      - name: Build static site
+      - name: Build
         run: |
           mkdir -p public
           cp -r frontend/* public/
           touch public/.nojekyll
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2
-        with:
-          path: 'public'
+      - name: Upload
+        uses: actions/upload-pages-artifact@v2  # Официальный метод для Pages
 
-      - name: Deploy to GitHub Pages
+      - name: Deploy
         uses: actions/deploy-pages@v2
