@@ -12,22 +12,21 @@ jobs:
       id-token: write
 
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v3
-
-      - name: Build static site
+      - name: Build
         run: |
           mkdir -p public
           cp -r frontend/* public/
           touch public/.nojekyll
 
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v2
-        with:
-          path: 'public'
-
-      - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v2
+      - name: Direct Deploy
+        run: |
+          cd public
+          git init
+          git add .
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git commit -m "Deploy to GitHub Pages"
+          git push -f https://${{ github.token }}@github.com/${{ github.repository }}.git main:gh-pages
