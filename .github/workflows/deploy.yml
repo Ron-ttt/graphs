@@ -25,8 +25,9 @@ jobs:
         run: |
           cd public
           git init
+          git checkout -b gh-pages  # Явно создаем нужную ветку
           git add .
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git commit -m "Deploy to GitHub Pages"
-          git push -f https://${{ github.token }}@github.com/${{ github.repository }}.git main:gh-pages
+          git push -f https://${{ github.token }}@github.com/${{ github.repository }}.git gh-pages
