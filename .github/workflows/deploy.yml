@@ -1,33 +1,23 @@
 name: Deploy to GitHub Pages
-
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # Даем права на запись
-      pages: write     # Разрешаем публикацию Pages
-      id-token: write  # Для OIDC
+      contents: write
+      pages: write
     
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Setup Pages
-        uses: actions/configure-pages@v3
-        
-      - name: Copy files
+
+      - name: Build
         run: |
           mkdir -p public
           cp -r frontend/* public/
-          
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2
-        with:
-          path: 'public'
-          
-      - name: Deploy to GitHub Pages
-        id: deployment
+          touch public/.nojekyll  # Важно!
+
+      - name: Deploy
         uses: actions/deploy-pages@v2
