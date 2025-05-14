@@ -22,7 +22,7 @@ document.getElementById("transfer-function-form").addEventListener("submit", asy
     const latex = convertToLatex(funcInput);
     formulaDiv.innerHTML = `\\[ W(s) = ${latex} \\]`;
     if (window.MathJax) MathJax.typesetPromise();
-    const API_URL ="https://go-graphs-api.onrender.com/api/compute"
+    const API_URL ="https://control-system-mtxi.onrender.com/api/compute"
     try {
         const response = await fetch(API_URL, {
             method: "POST",
