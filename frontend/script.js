@@ -22,7 +22,8 @@ document.getElementById("transfer-function-form").addEventListener("submit", asy
     const latex = convertToLatex(funcInput);
     formulaDiv.innerHTML = `\\[ W(s) = ${latex} \\]`;
     if (window.MathJax) MathJax.typesetPromise();
-    const API_URL ="https://go-graphs-api.onrender.com/api/compute"
+    const API_URL = "https://go-graphs-api.onrender.com/api/compute";
+
     try {
         const response = await fetch(API_URL, {
             method: "POST",
@@ -38,19 +39,22 @@ document.getElementById("transfer-function-form").addEventListener("submit", asy
         const data = await response.json();
         console.log("Полученные данные:", data); // Для отладки
         
-        const cacheBust = `?t=${Date.now()}`;
-
         // Обработка нулей и полюсов (они могут быть строкой)
         const zerosText = typeof data.zeros === 'string' ? data.zeros : 
                         (Array.isArray(data.zeros) ? data.zeros.join(", ") : "Нет данных");
         const polesText = typeof data.poles === 'string' ? data.poles : 
                         (Array.isArray(data.poles) ? data.poles.join(", ") : "Нет данных");
 
+        // Добавляем информацию об устойчивости системы
+        const stabilityText = data.is_stable ? 
+            `<span style="color: green;">Система устойчива</span>` : 
+            `<span style="color: red;">Система неустойчива</span>`;
+
         // Создаем карту графиков и их описаний
         const graphMap = {
             "bode": {
                 title: "Частотная характеристика (Боде)",
-                description: `Запас устойчивости: ${data.stability_margin || 'Нет данных'}°`
+                description: `${stabilityText}<br>Запас устойчивости: ${data.stability_margin || 'Нет данных'}°`
             },
             "step_response": {
                 title: "Переходная характеристика",
@@ -94,7 +98,7 @@ document.getElementById("transfer-function-form").addEventListener("submit", asy
 
                 block.innerHTML = `
                     <div class="graph-title">${graphInfo.title}</div>
-                    <img src="${data[key]}${cacheBust}" alt="${key}" loading="lazy">
+                    <img src="${data[key]}" alt="${key}" loading="lazy">
                     <div class="graph-data">${graphInfo.description}</div>
                 `;
                 
