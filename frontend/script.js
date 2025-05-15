@@ -96,9 +96,15 @@ document.getElementById("transfer-function-form").addEventListener("submit", asy
                 const block = document.createElement("div");
                 block.className = "graph-block";
 
+                // Исправленная часть: проверяем и формируем корректный data URL
+                let imageData = data[key];
+                if (!imageData.startsWith('data:image/')) {
+                    imageData = `data:image/png;base64,${imageData}`;
+                }
+
                 block.innerHTML = `
                     <div class="graph-title">${graphInfo.title}</div>
-                    <img src="${data[key]}" alt="${key}" loading="lazy">
+                    <img src="${imageData}" alt="${key}" loading="lazy">
                     <div class="graph-data">${graphInfo.description}</div>
                 `;
                 
@@ -114,7 +120,7 @@ document.getElementById("transfer-function-form").addEventListener("submit", asy
     }
 });
 
-// Функции проверки и преобразования остаются без изменений
+// Остальные функции остаются без изменений
 function isValidTransferFunction(input) {
     const regex = /^\(.*\)\/\(.*\)$/;
     return regex.test(input.trim());
