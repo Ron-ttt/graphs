@@ -23,7 +23,7 @@ document.getElementById("transfer-function-form").addEventListener("submit", asy
     formulaDiv.innerHTML = `\\[ W(s) = ${latex} \\]`;
     if (window.MathJax) MathJax.typesetPromise();
     
-    const API_URL ="https://control-system-mtxi.onrender.com/api/compute"
+    const API_URL = "https://control-system-mtxi.onrender.com/api/compute";
     try {
         const response = await fetch(API_URL, {
             method: "POST",
@@ -37,20 +37,40 @@ document.getElementById("transfer-function-form").addEventListener("submit", asy
         }
 
         const data = await response.json();
-        console.log("Полученные данные:", data); // Для отладки
+        console.log("Полученные данные:", data);
         
-        // Обработка нулей и полюсов (они могут быть строкой)
+        // Обработка данных
         const zerosText = typeof data.zeros === 'string' ? data.zeros : 
                         (Array.isArray(data.zeros) ? data.zeros.join(", ") : "Нет данных");
         const polesText = typeof data.poles === 'string' ? data.poles : 
                         (Array.isArray(data.poles) ? data.poles.join(", ") : "Нет данных");
 
-        // Добавляем информацию об устойчивости системы
         const stabilityText = data.is_stable ? 
             `<span style="color: green;">Система устойчива</span>` : 
             `<span style="color: red;">Система неустойчива</span>`;
 
-        // Создаем карту графиков и их описаний
+        // Полный пересмотр обработки изображений
+        const handleImageData = (imgData) => {
+            if (!imgData) return null;
+            
+            // Если это уже data URL
+            if (imgData.startsWith('data:image/')) {
+                return imgData;
+            }
+            
+            // Если это base64 без префикса
+            if (/^[A-Za-z0-9+/=]+$/.test(imgData)) {
+                return `data:image/png;base64,${imgData}`;
+            }
+            
+            // Если это URL (относительный или абсолютный)
+            if (imgData.startsWith('/') || imgData.startsWith('http')) {
+                return new URL(imgData, API_URL).href;
+            }
+            
+            return null;
+        };
+
         const graphMap = {
             "bode": {
                 title: "Частотная характеристика (Боде)",
@@ -79,7 +99,6 @@ document.getElementById("transfer-function-form").addEventListener("submit", asy
             }
         };
 
-        // Порядок отображения графиков
         const displayOrder = [
             "bode",
             "step_response",
@@ -89,26 +108,24 @@ document.getElementById("transfer-function-form").addEventListener("submit", asy
             "poles_zeros"
         ];
 
-        // Создаем графики в указанном порядке
         displayOrder.forEach(key => {
             if (data[key]) {
                 const graphInfo = graphMap[key];
                 const block = document.createElement("div");
                 block.className = "graph-block";
 
-                // Исправленная часть: проверяем и формируем корректный data URL
-                let imageData = data[key];
-                if (!imageData.startsWith('data:image/')) {
-                    imageData = `data:image/png;base64,${imageData}`;
-                }
-
-                block.innerHTML = `
-                    <div class="graph-title">${graphInfo.title}</div>
-                    <img src="${imageData}" alt="${key}" loading="lazy">
-                    <div class="graph-data">${graphInfo.description}</div>
-                `;
+                const imageSrc = handleImageData(data[key]);
                 
-                graphsDiv.appendChild(block);
+                if (imageSrc) {
+                    block.innerHTML = `
+                        <div class="graph-title">${graphInfo.title}</div>
+                        <img src="${imageSrc}" alt="${key}" loading="lazy">
+                        <div class="graph-data">${graphInfo.description}</div>
+                    `;
+                    graphsDiv.appendChild(block);
+                } else {
+                    console.warn(`Неверный формат данных для графика: ${key}`, data[key]);
+                }
             }
         });
 
@@ -120,7 +137,7 @@ document.getElementById("transfer-function-form").addEventListener("submit", asy
     }
 });
 
-// Остальные функции остаются без изменений
+// Остальные функции без изменений
 function isValidTransferFunction(input) {
     const regex = /^\(.*\)\/\(.*\)$/;
     return regex.test(input.trim());
